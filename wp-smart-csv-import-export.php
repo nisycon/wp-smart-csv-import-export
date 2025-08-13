@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WP Smart CSV Import/Export
+ * Plugin Name: Smart CSV Import & Export
  * Plugin URI: https://qoox.co.jp/wp-smart-csv-import-export
  * Description: 汎用的なCSVインポート・エクスポートプラグイン。全ての投稿タイプ、カスタムフィールド、タクソノミーに対応。エクスポートしたCSVファイルをそのままインポート可能。
  * Version: 1.0.0
@@ -12,7 +12,7 @@
  * Text Domain: wp-smart-csv-import-export
  * Domain Path: /languages
  * Requires at least: 5.0
- * Tested up to: 6.4
+ * Tested up to: 6.8
  * Requires PHP: 7.4
  */
 
@@ -63,7 +63,7 @@ class WpSmartCsvImportExport {
      * フック初期化
      */
     private function init_hooks() {
-        add_action('init', array($this, 'load_textdomain'));
+
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_smart_csv_export', array($this, 'handle_csv_export'));
@@ -75,25 +75,25 @@ class WpSmartCsvImportExport {
         add_action('wp_ajax_smart_csv_import_count', array($this, 'handle_csv_import_count'));
         add_action('wp_ajax_smart_csv_cleanup', array($this, 'handle_csv_cleanup'));
         
+        // キャッシュ無効化フック
+        add_action('added_post_meta', array($this, 'clear_meta_fields_cache'), 10, 4);
+        add_action('updated_post_meta', array($this, 'clear_meta_fields_cache'), 10, 4);
+        add_action('deleted_post_meta', array($this, 'clear_meta_fields_cache'), 10, 4);
+        
         // プラグイン有効化・無効化フック
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
     }
     
-    /**
-     * 言語ファイル読み込み
-     */
-    public function load_textdomain() {
-        load_plugin_textdomain($this'wp-smart-csv-import-export', false, dirname(WP_SMART_CSV_PLUGIN_BASENAME) . '/languages');
-    }
+
     
     /**
      * 管理メニュー追加
      */
     public function add_admin_menu() {
         add_menu_page(
-            __('WP Smart CSV Import/Export', $this'wp-smart-csv-import-export'),
-            __('CSV IMP/EXP', $this'wp-smart-csv-import-export'),
+            esc_html__('Smart CSV Import & Export', 'wp-smart-csv-import-export'),
+            esc_html__('CSV IMP/EXP', 'wp-smart-csv-import-export'),
             'manage_options',
             'wp-smart-csv-import-export',
             array($this, 'admin_page'),
@@ -130,12 +130,12 @@ class WpSmartCsvImportExport {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wp_smart_csv_nonce'),
             'strings' => array(
-                'export_success' => __('エクスポートが完了しました。', $this'wp-smart-csv-import-export'),
-                'import_success' => __('インポートが完了しました。', $this'wp-smart-csv-import-export'),
-                'error' => __('エラーが発生しました。', $this'wp-smart-csv-import-export'),
-                'processing' => __('処理中...', $this'wp-smart-csv-import-export'),
-                'select_post_type' => __('投稿タイプを選択してください。', $this'wp-smart-csv-import-export'),
-                'select_csv_file' => __('CSVファイルを選択してください。', $this'wp-smart-csv-import-export'),
+                'export_success' => esc_html__('エクスポートが完了しました。', 'wp-smart-csv-import-export'),
+                'import_success' => esc_html__('インポートが完了しました。', 'wp-smart-csv-import-export'),
+                'error' => esc_html__('エラーが発生しました。', 'wp-smart-csv-import-export'),
+                'processing' => esc_html__('処理中...', 'wp-smart-csv-import-export'),
+                'select_post_type' => esc_html__('投稿タイプを選択してください。', 'wp-smart-csv-import-export'),
+                'select_csv_file' => esc_html__('CSVファイルを選択してください。', 'wp-smart-csv-import-export'),
             )
         ));
     }
@@ -160,31 +160,31 @@ class WpSmartCsvImportExport {
                          <div class="csv-manager">
                  <div class="csv-manager__tabs">
                      <button class="csv-manager__tab csv-manager__tab--active" data-tab="export">
-                         <?php _e('CSVエクスポート', $this'wp-smart-csv-import-export'); ?>
+                         <?php esc_html_e('CSVエクスポート', 'wp-smart-csv-import-export'); ?>
                      </button>
                      <button class="csv-manager__tab" data-tab="import">
-                         <?php _e('CSVインポート', $this'wp-smart-csv-import-export'); ?>
+                         <?php esc_html_e('CSVインポート', 'wp-smart-csv-import-export'); ?>
                      </button>
                      <button class="csv-manager__tab" data-tab="help">
-                         <?php _e('ヘルプ', $this'wp-smart-csv-import-export'); ?>
+                         <?php esc_html_e('ヘルプ', 'wp-smart-csv-import-export'); ?>
                      </button>
                  </div>
                  
                  <!-- エクスポートタブ -->
                  <div class="csv-manager__panel csv-manager__panel--active" data-panel="export">
-                    <h2><?php _e('CSVエクスポート', $this'wp-smart-csv-import-export'); ?></h2>
-                    <p><?php _e('投稿データをCSVファイルとしてエクスポートします。', $this'wp-smart-csv-import-export'); ?></p>
+                    <h2><?php esc_html_e('CSVエクスポート', 'wp-smart-csv-import-export'); ?></h2>
+                    <p><?php esc_html_e('投稿データをCSVファイルとしてエクスポートします。', 'wp-smart-csv-import-export'); ?></p>
                     
                     <form id="export-form">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="export_post_type"><?php _e('投稿タイプ', $this'wp-smart-csv-import-export'); ?></label>
+                                    <label for="export_post_type"><?php esc_html_e('投稿タイプ', 'wp-smart-csv-import-export'); ?></label>
                                 </th>
                                 <td>
                                     <select id="export_post_type" name="post_type" required>
-                                        <option value=""><?php _e('選択してください', $this'wp-smart-csv-import-export'); ?></option>
-                                        <option value="all"><?php _e('すべての投稿タイプ', $this'wp-smart-csv-import-export'); ?></option>
+                                        <option value=""><?php esc_html_e('選択してください', 'wp-smart-csv-import-export'); ?></option>
+                                        <option value="all"><?php esc_html_e('すべての投稿タイプ', 'wp-smart-csv-import-export'); ?></option>
                                         <?php foreach ($post_types as $post_type): ?>
                                             <option value="<?php echo esc_attr($post_type->name); ?>">
                                                 <?php echo esc_html($post_type->labels->name); ?>
@@ -194,40 +194,40 @@ class WpSmartCsvImportExport {
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"><?php _e('投稿ステータス', $this'wp-smart-csv-import-export'); ?></th>
+                                <th scope="row"><?php esc_html_e('投稿ステータス', 'wp-smart-csv-import-export'); ?></th>
                                 <td>
                                     <fieldset>
-                                        <label><input type="checkbox" name="post_status[]" value="publish" checked> <?php _e('公開済み', $this'wp-smart-csv-import-export'); ?></label><br>
-                                        <label><input type="checkbox" name="post_status[]" value="draft"> <?php _e('下書き', $this'wp-smart-csv-import-export'); ?></label><br>
-                                        <label><input type="checkbox" name="post_status[]" value="private"> <?php _e('非公開', $this'wp-smart-csv-import-export'); ?></label><br>
-                                        <label><input type="checkbox" name="post_status[]" value="pending"> <?php _e('レビュー待ち', $this'wp-smart-csv-import-export'); ?></label><br>
-                                        <label><input type="checkbox" name="post_status[]" value="future"> <?php _e('予約投稿', $this'wp-smart-csv-import-export'); ?></label><br>
-                                        <label><input type="checkbox" name="post_status[]" value="trash"> <?php _e('ゴミ箱', $this'wp-smart-csv-import-export'); ?></label>
+                                        <label><input type="checkbox" name="post_status[]" value="publish" checked> <?php esc_html_e('公開済み', 'wp-smart-csv-import-export'); ?></label><br>
+                                        <label><input type="checkbox" name="post_status[]" value="draft"> <?php esc_html_e('下書き', 'wp-smart-csv-import-export'); ?></label><br>
+                                        <label><input type="checkbox" name="post_status[]" value="private"> <?php esc_html_e('非公開', 'wp-smart-csv-import-export'); ?></label><br>
+                                        <label><input type="checkbox" name="post_status[]" value="pending"> <?php esc_html_e('レビュー待ち', 'wp-smart-csv-import-export'); ?></label><br>
+                                        <label><input type="checkbox" name="post_status[]" value="future"> <?php esc_html_e('予約投稿', 'wp-smart-csv-import-export'); ?></label><br>
+                                        <label><input type="checkbox" name="post_status[]" value="trash"> <?php esc_html_e('ゴミ箱', 'wp-smart-csv-import-export'); ?></label>
                                     </fieldset>
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"><?php _e('エクスポート件数', $this'wp-smart-csv-import-export'); ?></th>
+                                <th scope="row"><?php esc_html_e('エクスポート件数', 'wp-smart-csv-import-export'); ?></th>
                                 <td>
                                     <input type="number" name="limit" value="0" min="0" style="width: 100px;">
-                                    <p class="description"><?php _e('0を指定すると全件エクスポートします。', $this'wp-smart-csv-import-export'); ?></p>
+                                    <p class="description"><?php esc_html_e('0を指定すると全件エクスポートします。', 'wp-smart-csv-import-export'); ?></p>
                                 </td>
                             </tr>
                             
                                                          <tr>
-                                 <th scope="row"><?php _e('日付範囲', $this'wp-smart-csv-import-export'); ?></th>
+                                 <th scope="row"><?php esc_html_e('日付範囲', 'wp-smart-csv-import-export'); ?></th>
                                  <td>
-                                     <label for="date_from"><?php _e('開始日', $this'wp-smart-csv-import-export'); ?>:</label>
+                                     <label for="date_from"><?php esc_html_e('開始日', 'wp-smart-csv-import-export'); ?>:</label>
                                      <input type="date" id="date_from" name="date_from" class="form__input">
-                                     <label for="date_to"><?php _e('終了日', $this'wp-smart-csv-import-export'); ?>:</label>
+                                     <label for="date_to"><?php esc_html_e('終了日', 'wp-smart-csv-import-export'); ?>:</label>
                                      <input type="date" id="date_to" name="date_to" class="form__input">
                                  </td>
                              </tr>
                             <tr>
-                                                                 <th scope="row"><?php _e('フィールド選択', $this'wp-smart-csv-import-export'); ?></th>
+                                                                 <th scope="row"><?php esc_html_e('フィールド選択', 'wp-smart-csv-import-export'); ?></th>
                                  <td>
                                      <div class="field-selector" id="export-fields-container">
-                                         <p class="field-selector__placeholder"><?php _e('投稿タイプを選択すると、利用可能なフィールドが表示されます。', $this'wp-smart-csv-import-export'); ?></p>
+                                         <p class="field-selector__placeholder"><?php esc_html_e('投稿タイプを選択すると、利用可能なフィールドが表示されます。', 'wp-smart-csv-import-export'); ?></p>
                                      </div>
                                  </td>
                             </tr>
@@ -236,7 +236,7 @@ class WpSmartCsvImportExport {
                         <?php wp_nonce_field('wp_smart_csv_nonce', 'csv_nonce'); ?>
                         <p class="submit">
                             <button type="submit" class="button-primary" id="export-btn">
-                                <?php _e('CSVエクスポート', $this'wp-smart-csv-import-export'); ?>
+                                <?php esc_html_e('CSVエクスポート', 'wp-smart-csv-import-export'); ?>
                             </button>
                         </p>
                     </form>
@@ -245,13 +245,17 @@ class WpSmartCsvImportExport {
                     
                     <!-- 寄付セクション -->
                     <div style="background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-top: 30px;">
-                        <h4 style="margin-top: 0; color: #0073aa; font-size: 14px;"><?php _e('このプラグインが役に立ちましたか？', $this'wp-smart-csv-import-export'); ?></h4>
-                        <p style="font-size: 13px; margin: 8px 0;"><?php _e('開発支援をご検討ください。', $this'wp-smart-csv-import-export'); ?></p>
+                        <h4 style="margin-top: 0; color: #0073aa; font-size: 14px;"><?php esc_html_e('このプラグインが役に立ちましたか？', 'wp-smart-csv-import-export'); ?></h4>
+                        <p style="font-size: 13px; margin: 8px 0;"><?php esc_html_e('WP Smart CSV Import/Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしよかったら労いの気持ちをこめて、私にスターバックスラテを奢ってくれませんか？', 'wp-smart-csv-import-export'); ?></p>
                         
                         <div style="text-align: center;">
                             <style>.pp-JKL3WTQLH5NXA{text-align:center;border:none;border-radius:0.25rem;min-width:11.625rem;padding:0 2rem;height:2.625rem;font-weight:bold;background-color:#394887;color:#ffffff;font-family:"Helvetica Neue",Arial,sans-serif;font-size:1rem;line-height:1.25rem;cursor:pointer;}</style>
                             <form action="https://www.paypal.com/ncp/payment/JKL3WTQLH5NXA" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
-                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php _e('寄付する', $this'wp-smart-csv-import-export'); ?>" style="transform: scale(0.8);" />
+                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php esc_html_e('寄付する', 'wp-smart-csv-import-export'); ?>" style="transform: scale(0.8);" />
+                                <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-cards.svg'); ?>" alt="cards" style="max-width: 160px;" />
+                                <section style="font-size: 0.6rem;"> 
+                                    Powered by <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-logo.svg'); ?>" alt="paypal" style="height:0.7rem;vertical-align:middle;"/>
+                                </section>
                             </form>
                         </div>
                     </div>
@@ -259,16 +263,16 @@ class WpSmartCsvImportExport {
                 
                                  <!-- インポートタブ -->
                  <div class="csv-manager__panel" data-panel="import">
-                    <h2><?php _e('CSVインポート', $this'wp-smart-csv-import-export'); ?></h2>
-                    <p><?php _e('CSVファイルから投稿データをインポートします。', $this'wp-smart-csv-import-export'); ?></p>
+                    <h2><?php esc_html_e('CSVインポート', 'wp-smart-csv-import-export'); ?></h2>
+                    <p><?php esc_html_e('CSVファイルから投稿データをインポートします。', 'wp-smart-csv-import-export'); ?></p>
                     
                     <div class="csv-manager__warning">
-                        <h3>⚠️ <?php _e('重要な注意事項', $this'wp-smart-csv-import-export'); ?></h3>
+                        <h3>⚠️ <?php esc_html_e('重要な注意事項', 'wp-smart-csv-import-export'); ?></h3>
                         <ul>
-                            <li><strong><?php _e('処理中はブラウザタブを閉じないでください', $this'wp-smart-csv-import-export'); ?></strong></li>
-                            <li><strong><?php _e('別のページに移動しないでください', $this'wp-smart-csv-import-export'); ?></strong></li>
-                            <li><strong><?php _e('PCをスリープさせないでください', $this'wp-smart-csv-import-export'); ?></strong></li>
-                            <li><?php _e('大きなファイルの場合は、処理完了まで画面を開いたままにしてください', $this'wp-smart-csv-import-export'); ?></li>
+                            <li><strong><?php esc_html_e('処理中はブラウザタブを閉じないでください', 'wp-smart-csv-import-export'); ?></strong></li>
+                            <li><strong><?php esc_html_e('別のページに移動しないでください', 'wp-smart-csv-import-export'); ?></strong></li>
+                            <li><strong><?php esc_html_e('PCをスリープさせないでください', 'wp-smart-csv-import-export'); ?></strong></li>
+                            <li><?php esc_html_e('大きなファイルの場合は、処理完了まで画面を開いたままにしてください', 'wp-smart-csv-import-export'); ?></li>
                         </ul>
                     </div>
                     
@@ -277,31 +281,31 @@ class WpSmartCsvImportExport {
 
                             <tr>
                                 <th scope="row">
-                                    <label for="csv_file"><?php _e('CSVファイル', $this'wp-smart-csv-import-export'); ?></label>
+                                    <label for="csv_file"><?php esc_html_e('CSVファイル', 'wp-smart-csv-import-export'); ?></label>
                                 </th>
                                 <td>
                                     <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
                                     <p class="description">
-                                        <?php _e('UTF-8エンコードのCSVファイルをアップロードしてください。最大10MBまで。', $this'wp-smart-csv-import-export'); ?>
+                                        <?php esc_html_e('UTF-8エンコードのCSVファイルをアップロードしてください。最大10MBまで。', 'wp-smart-csv-import-export'); ?>
                                     </p>
                                 </td>
                             </tr>
                                                          <tr>
-                                 <th scope="row"><?php _e('インポートモード', $this'wp-smart-csv-import-export'); ?></th>
+                                 <th scope="row"><?php esc_html_e('インポートモード', 'wp-smart-csv-import-export'); ?></th>
                                  <td>
                                      <fieldset>
                                          <label>
                                              <input type="radio" name="import_mode" value="update" checked>
-                                             <?php _e('更新＋新規作成', $this'wp-smart-csv-import-export'); ?>
+                                             <?php esc_html_e('更新＋新規作成', 'wp-smart-csv-import-export'); ?>
                                          </label><br>
                                          <label>
                                              <input type="radio" name="import_mode" value="create">
-                                             <?php _e('新規作成のみ（非推奨）', $this'wp-smart-csv-import-export'); ?>
+                                             <?php esc_html_e('新規作成のみ（非推奨）', 'wp-smart-csv-import-export'); ?>
                                          </label>
                                      </fieldset>
                                      <p class="description">
-                                         <strong><?php _e('更新＋新規作成', $this'wp-smart-csv-import-export'); ?>:</strong> <?php _e('IDが一致する投稿は更新、IDがない場合は新規作成します（推奨）', $this'wp-smart-csv-import-export'); ?><br>
-                                         <strong><?php _e('新規作成のみ（非推奨）', $this'wp-smart-csv-import-export'); ?>:</strong> <?php _e('IDが設定されていても無視して、常に新規投稿を作成します', $this'wp-smart-csv-import-export'); ?>
+                                         <strong><?php esc_html_e('更新＋新規作成', 'wp-smart-csv-import-export'); ?>:</strong> <?php esc_html_e('IDが一致する投稿は更新、IDがない場合は新規作成します（推奨）', 'wp-smart-csv-import-export'); ?><br>
+                                         <strong><?php esc_html_e('新規作成のみ（非推奨）', 'wp-smart-csv-import-export'); ?>:</strong> <?php esc_html_e('IDが設定されていても無視して、常に新規投稿を作成します', 'wp-smart-csv-import-export'); ?>
                                      </p>
                                  </td>
                                                          </tr>
@@ -310,7 +314,7 @@ class WpSmartCsvImportExport {
                         <?php wp_nonce_field('wp_smart_csv_nonce', 'csv_nonce'); ?>
                         <p class="submit">
                             <button type="submit" class="button-primary" id="import-btn">
-                                <?php _e('CSVインポート', $this'wp-smart-csv-import-export'); ?>
+                                <?php esc_html_e('CSVインポート', 'wp-smart-csv-import-export'); ?>
                             </button>
                         </p>
                     </form>
@@ -330,13 +334,17 @@ class WpSmartCsvImportExport {
                     
                     <!-- 寄付セクション -->
                     <div style="background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-top: 30px;">
-                        <h4 style="margin-top: 0; color: #0073aa; font-size: 14px;"><?php _e('このプラグインが役に立ちましたか？', $this'wp-smart-csv-import-export'); ?></h4>
-                        <p style="font-size: 13px; margin: 8px 0;"><?php _e('開発支援をご検討ください。', $this'wp-smart-csv-import-export'); ?></p>
+                        <h4 style="margin-top: 0; color: #0073aa; font-size: 14px;"><?php esc_html_e('このプラグインが役に立ちましたか？', 'wp-smart-csv-import-export'); ?></h4>
+                        <p style="font-size: 13px; margin: 8px 0;"><?php esc_html_e('WP Smart CSV Import/Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしよかったら労いの気持ちをこめて、私にスターバックスラテを奢ってくれませんか？', 'wp-smart-csv-import-export'); ?></p>
                         
                         <div style="text-align: center;">
                             <style>.pp-JKL3WTQLH5NXA{text-align:center;border:none;border-radius:0.25rem;min-width:11.625rem;padding:0 2rem;height:2.625rem;font-weight:bold;background-color:#394887;color:#ffffff;font-family:"Helvetica Neue",Arial,sans-serif;font-size:1rem;line-height:1.25rem;cursor:pointer;}</style>
                             <form action="https://www.paypal.com/ncp/payment/JKL3WTQLH5NXA" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
-                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php _e('寄付する', $this'wp-smart-csv-import-export'); ?>" style="transform: scale(0.8);" />
+                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php esc_html_e('寄付する', 'wp-smart-csv-import-export'); ?>" style="transform: scale(0.8);" />
+                                <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-cards.svg'); ?>" alt="cards" style="max-width: 160px;" />
+                                <section style="font-size: 0.6rem;"> 
+                                    Powered by <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-logo.svg'); ?>" alt="paypal" style="height:0.7rem;vertical-align:middle;"/>
+                                </section>
                             </form>
                         </div>
                     </div>
@@ -344,75 +352,75 @@ class WpSmartCsvImportExport {
                 
                                  <!-- ヘルプタブ -->
                  <div class="csv-manager__panel" data-panel="help">
-                    <h2><?php _e('使用方法', $this'wp-smart-csv-import-export'); ?></h2>
+                    <h2><?php esc_html_e('使用方法', 'wp-smart-csv-import-export'); ?></h2>
                     
-                    <h3><?php _e('基本的な使い方', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('基本的な使い方', 'wp-smart-csv-import-export'); ?></h3>
                     <ol>
-                        <li><?php _e('エクスポートタブで投稿タイプを選択し、必要なフィールドにチェックを入れてエクスポート', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><?php _e('ダウンロードされたCSVファイルを編集', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><?php _e('インポートタブで編集したCSVファイルをアップロードしてインポート', $this'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('エクスポートタブで投稿タイプを選択し、必要なフィールドにチェックを入れてエクスポート', 'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('ダウンロードされたCSVファイルを編集', 'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('インポートタブで編集したCSVファイルをアップロードしてインポート', 'wp-smart-csv-import-export'); ?></li>
                     </ol>
                     
-                    <h3><?php _e('対応フィールド', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('対応フィールド', 'wp-smart-csv-import-export'); ?></h3>
                     <ul>
-                        <li><strong><?php _e('基本フィールド', $this'wp-smart-csv-import-export'); ?>:</strong> ID, post_type（投稿タイプ）, タイトル, 内容, 抜粋, ステータス, 公開日時, 変更日時, 投稿者, スラッグ, 親投稿, メニュー順序</li>
-                        <li><strong><?php _e('カスタムフィールド', $this'wp-smart-csv-import-export'); ?>:</strong> 全てのカスタムフィールド（ACF含む）</li>
-                        <li><strong><?php _e('タクソノミー', $this'wp-smart-csv-import-export'); ?>:</strong> カテゴリー、タグ、カスタムタクソノミー</li>
-                        <li><strong><?php _e('アイキャッチ画像', $this'wp-smart-csv-import-export'); ?>:</strong> 画像URL、添付ファイルID</li>
+                        <li><strong><?php esc_html_e('基本フィールド', 'wp-smart-csv-import-export'); ?>:</strong> ID, post_type（投稿タイプ）, タイトル, 内容, 抜粋, ステータス, 公開日時, 変更日時, 投稿者, スラッグ, 親投稿, メニュー順序</li>
+                        <li><strong><?php esc_html_e('カスタムフィールド', 'wp-smart-csv-import-export'); ?>:</strong> 全てのカスタムフィールド（ACF含む）</li>
+                        <li><strong><?php esc_html_e('タクソノミー', 'wp-smart-csv-import-export'); ?>:</strong> カテゴリー、タグ、カスタムタクソノミー</li>
+                        <li><strong><?php esc_html_e('アイキャッチ画像', 'wp-smart-csv-import-export'); ?>:</strong> 画像URL、添付ファイルID</li>
                     </ul>
                     
-                    <h3><?php _e('技術仕様', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('技術仕様', 'wp-smart-csv-import-export'); ?></h3>
                     
-                    <h4><?php _e('post_type列について', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('post_type列について', 'wp-smart-csv-import-export'); ?></h4>
                     <ul>
-                        <li><strong><?php _e('エクスポート時', $this'wp-smart-csv-import-export'); ?>:</strong> 各投稿の投稿タイプ名が出力されます（例：post, page, items, product）</li>
-                        <li><strong><?php _e('インポート時', $this'wp-smart-csv-import-export'); ?>:</strong> post_type列の値に基づいて投稿タイプが自動判別されます</li>
-                        <li><strong><?php _e('投稿タイプ選択不要', $this'wp-smart-csv-import-export'); ?>:</strong> インポート時は投稿タイプを選択する必要がありません</li>
-                        <li><strong><?php _e('混在データ対応', $this'wp-smart-csv-import-export'); ?>:</strong> 異なる投稿タイプが混在するCSVでも一括インポート可能</li>
+                        <li><strong><?php esc_html_e('エクスポート時', 'wp-smart-csv-import-export'); ?>:</strong> 各投稿の投稿タイプ名が出力されます（例：post, page, items, product）</li>
+                        <li><strong><?php esc_html_e('インポート時', 'wp-smart-csv-import-export'); ?>:</strong> post_type列の値に基づいて投稿タイプが自動判別されます</li>
+                        <li><strong><?php esc_html_e('投稿タイプ選択不要', 'wp-smart-csv-import-export'); ?>:</strong> インポート時は投稿タイプを選択する必要がありません</li>
+                        <li><strong><?php esc_html_e('混在データ対応', 'wp-smart-csv-import-export'); ?>:</strong> 異なる投稿タイプが混在するCSVでも一括インポート可能</li>
                     </ul>
                     
-                    <h4><?php _e('ID判別システム', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('ID判別システム', 'wp-smart-csv-import-export'); ?></h4>
                     <ul>
-                        <li><strong><?php _e('一意性', $this'wp-smart-csv-import-export'); ?>:</strong> WordPressでは全投稿タイプでIDが一意に管理されます</li>
-                        <li><strong><?php _e('更新判定', $this'wp-smart-csv-import-export'); ?>:</strong> IDが存在する場合は投稿タイプに関係なく既存投稿として更新されます</li>
-                        <li><strong><?php _e('新規作成', $this'wp-smart-csv-import-export'); ?>:</strong> IDが空または存在しない場合は新規投稿として作成されます</li>
-                        <li><strong><?php _e('投稿タイプ変更', $this'wp-smart-csv-import-export'); ?>:</strong> 既存投稿の投稿タイプをCSVで変更することが可能です</li>
+                        <li><strong><?php esc_html_e('一意性', 'wp-smart-csv-import-export'); ?>:</strong> WordPressでは全投稿タイプでIDが一意に管理されます</li>
+                        <li><strong><?php esc_html_e('更新判定', 'wp-smart-csv-import-export'); ?>:</strong> IDが存在する場合は投稿タイプに関係なく既存投稿として更新されます</li>
+                        <li><strong><?php esc_html_e('新規作成', 'wp-smart-csv-import-export'); ?>:</strong> IDが空または存在しない場合は新規投稿として作成されます</li>
+                        <li><strong><?php esc_html_e('投稿タイプ変更', 'wp-smart-csv-import-export'); ?>:</strong> 既存投稿の投稿タイプをCSVで変更することが可能です</li>
                     </ul>
                     
-                    <h3><?php _e('CSVフォーマット', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('CSVフォーマット', 'wp-smart-csv-import-export'); ?></h3>
                     
-                    <h4><?php _e('エクスポート時（自動生成）', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('エクスポート時（自動生成）', 'wp-smart-csv-import-export'); ?></h4>
                     <ul>
-                        <li><strong><?php _e('文字エンコード', $this'wp-smart-csv-import-export'); ?>:</strong> UTF-8（BOM付き）- 日本語文字化け防止</li>
-                        <li><strong><?php _e('区切り文字', $this'wp-smart-csv-import-export'); ?>:</strong> カンマ（,）</li>
-                        <li><strong><?php _e('囲み文字', $this'wp-smart-csv-import-export'); ?>:</strong> ダブルクォート（"）- データ内のカンマや改行を保護</li>
-                        <li><strong><?php _e('改行文字', $this'wp-smart-csv-import-export'); ?>:</strong> CRLF（Windows標準）</li>
-                        <li><strong><?php _e('データ保護', $this'wp-smart-csv-import-export'); ?>:</strong> カンマや改行を含むデータは自動的にクォートで囲まれます</li>
+                        <li><strong><?php esc_html_e('文字エンコード', 'wp-smart-csv-import-export'); ?>:</strong> UTF-8（BOM付き）- 日本語文字化け防止</li>
+                        <li><strong><?php esc_html_e('区切り文字', 'wp-smart-csv-import-export'); ?>:</strong> カンマ（,）</li>
+                        <li><strong><?php esc_html_e('囲み文字', 'wp-smart-csv-import-export'); ?>:</strong> ダブルクォート（"）- データ内のカンマや改行を保護</li>
+                        <li><strong><?php esc_html_e('改行文字', 'wp-smart-csv-import-export'); ?>:</strong> CRLF（Windows標準）</li>
+                        <li><strong><?php esc_html_e('データ保護', 'wp-smart-csv-import-export'); ?>:</strong> カンマや改行を含むデータは自動的にクォートで囲まれます</li>
                     </ul>
                     
-                    <h4><?php _e('インポート時（要注意）', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('インポート時（要注意）', 'wp-smart-csv-import-export'); ?></h4>
                     <ul>
-                        <li><strong><?php _e('文字エンコード', $this'wp-smart-csv-import-export'); ?>:</strong> UTF-8（BOM付き推奨）</li>
-                        <li><strong><?php _e('区切り文字', $this'wp-smart-csv-import-export'); ?>:</strong> カンマ（,）必須</li>
-                        <li><strong><?php _e('データ内カンマ', $this'wp-smart-csv-import-export'); ?>:</strong> データにカンマが含まれる場合は必ずダブルクォートで囲んでください</li>
-                        <li><strong><?php _e('改行の扱い', $this'wp-smart-csv-import-export'); ?>:</strong> データ内改行はクォート内であれば保持されます</li>
-                        <li><strong><?php _e('Excel注意', $this'wp-smart-csv-import-export'); ?>:</strong> Excelで編集時は保存形式を「CSV UTF-8」にしてください</li>
+                        <li><strong><?php esc_html_e('文字エンコード', 'wp-smart-csv-import-export'); ?>:</strong> UTF-8（BOM付き推奨）</li>
+                        <li><strong><?php esc_html_e('区切り文字', 'wp-smart-csv-import-export'); ?>:</strong> カンマ（,）必須</li>
+                        <li><strong><?php esc_html_e('データ内カンマ', 'wp-smart-csv-import-export'); ?>:</strong> データにカンマが含まれる場合は必ずダブルクォートで囲んでください</li>
+                        <li><strong><?php esc_html_e('改行の扱い', 'wp-smart-csv-import-export'); ?>:</strong> データ内改行はクォート内であれば保持されます</li>
+                        <li><strong><?php esc_html_e('Excel注意', 'wp-smart-csv-import-export'); ?>:</strong> Excelで編集時は保存形式を「CSV UTF-8」にしてください</li>
                     </ul>
                     
-                    <h4><?php _e('データ内特殊文字の扱い', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('データ内特殊文字の扱い', 'wp-smart-csv-import-export'); ?></h4>
                     <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 10px 0;">
-                        <strong><?php _e('⚠️ 重要', $this'wp-smart-csv-import-export'); ?>:</strong> <?php _e('以下の文字を含むデータは必ずダブルクォートで囲んでください', $this'wp-smart-csv-import-export'); ?>
+                        <strong><?php esc_html_e('⚠️ 重要', 'wp-smart-csv-import-export'); ?>:</strong> <?php esc_html_e('以下の文字を含むデータは必ずダブルクォートで囲んでください', 'wp-smart-csv-import-export'); ?>
                         <ul style="margin-top: 8px;">
-                            <li><strong><?php _e('カンマ', $this'wp-smart-csv-import-export'); ?> (,):</strong> "<?php _e('商品A, 商品B, 商品C', $this'wp-smart-csv-import-export'); ?>"</li>
-                            <li><strong><?php _e('改行', $this'wp-smart-csv-import-export'); ?>:</strong> "<?php _e('1行目', $this'wp-smart-csv-import-export'); ?><br><?php _e('2行目', $this'wp-smart-csv-import-export'); ?>"</li>
-                            <li><strong><?php _e('ダブルクォート', $this'wp-smart-csv-import-export'); ?> ("):</strong> "<?php _e('彼は""こんにちは""と言った', $this'wp-smart-csv-import-export'); ?>"（データ内の"は""でエスケープ）</li>
+                            <li><strong><?php esc_html_e('カンマ', 'wp-smart-csv-import-export'); ?> (,):</strong> "<?php esc_html_e('商品A, 商品B, 商品C', 'wp-smart-csv-import-export'); ?>"</li>
+                            <li><strong><?php esc_html_e('改行', 'wp-smart-csv-import-export'); ?>:</strong> "<?php esc_html_e('1行目', 'wp-smart-csv-import-export'); ?><br><?php esc_html_e('2行目', 'wp-smart-csv-import-export'); ?>"</li>
+                            <li><strong><?php esc_html_e('ダブルクォート', 'wp-smart-csv-import-export'); ?> ("):</strong> "<?php esc_html_e('彼は""こんにちは""と言った', 'wp-smart-csv-import-export'); ?>"（データ内の"は""でエスケープ）</li>
                         </ul>
-                        <p style="margin-top: 8px; margin-bottom: 0;"><strong><?php _e('推奨', $this'wp-smart-csv-import-export'); ?>:</strong> <?php _e('当プラグインでエクスポートしたCSVを編集することで、フォーマットエラーを防げます', $this'wp-smart-csv-import-export'); ?></p>
+                        <p style="margin-top: 8px; margin-bottom: 0;"><strong><?php esc_html_e('推奨', 'wp-smart-csv-import-export'); ?>:</strong> <?php esc_html_e('当プラグインでエクスポートしたCSVを編集することで、フォーマットエラーを防げます', 'wp-smart-csv-import-export'); ?></p>
                     </div>
                     
-                    <h3><?php _e('実用例', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('実用例', 'wp-smart-csv-import-export'); ?></h3>
                     
-                    <h4><?php _e('CSVデータ例', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('CSVデータ例', 'wp-smart-csv-import-export'); ?></h4>
                     <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto;">
 ID,post_type,post_title,post_content,post_status
 1,post,"ブログ記事タイトル","記事の内容...",publish
@@ -420,40 +428,40 @@ ID,post_type,post_title,post_content,post_status
 ,items,"新しいアイテム","アイテムの説明...",draft
 123,product,"商品A","商品の詳細...",publish</pre>
                     
-                    <h4><?php _e('動作パターン', $this'wp-smart-csv-import-export'); ?></h4>
+                    <h4><?php esc_html_e('動作パターン', 'wp-smart-csv-import-export'); ?></h4>
                     <ul>
-                        <li><strong>ID=1:</strong> <?php _e('既存の投稿（ID:1）を更新', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><strong>ID=2:</strong> <?php _e('既存の固定ページ（ID:2）を更新', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><strong>ID空白:</strong> <?php _e('新しいitemsタイプの投稿を作成', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><strong>ID=123:</strong> <?php _e('ID:123の投稿をproductタイプに変更して更新', $this'wp-smart-csv-import-export'); ?></li>
+                        <li><strong>ID=1:</strong> <?php esc_html_e('既存の投稿（ID:1）を更新', 'wp-smart-csv-import-export'); ?></li>
+                        <li><strong>ID=2:</strong> <?php esc_html_e('既存の固定ページ（ID:2）を更新', 'wp-smart-csv-import-export'); ?></li>
+                        <li><strong>ID空白:</strong> <?php esc_html_e('新しいitemsタイプの投稿を作成', 'wp-smart-csv-import-export'); ?></li>
+                        <li><strong>ID=123:</strong> <?php esc_html_e('ID:123の投稿をproductタイプに変更して更新', 'wp-smart-csv-import-export'); ?></li>
                     </ul>
                     
-                    <h3><?php _e('注意事項', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('注意事項', 'wp-smart-csv-import-export'); ?></h3>
                     <ul>
-                        <li><?php _e('大量データのインポート時は、サーバーのメモリ制限やタイムアウトにご注意ください', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><?php _e('本番環境での使用前に、必ずテスト環境で動作確認を行ってください', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><?php _e('インポート前にデータベースのバックアップを取得することを強く推奨します', $this'wp-smart-csv-import-export'); ?></li>
-                        <li><?php _e('投稿タイプ変更時は、関連するカスタムフィールドやタクソノミーとの整合性をご確認ください', $this'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('大量データのインポート時は、サーバーのメモリ制限やタイムアウトにご注意ください', 'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('本番環境での使用前に、必ずテスト環境で動作確認を行ってください', 'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('インポート前にデータベースのバックアップを取得することを強く推奨します', 'wp-smart-csv-import-export'); ?></li>
+                        <li><?php esc_html_e('投稿タイプ変更時は、関連するカスタムフィールドやタクソノミーとの整合性をご確認ください', 'wp-smart-csv-import-export'); ?></li>
                     </ul>
                     
-                    <h3><?php _e('開発支援', $this'wp-smart-csv-import-export'); ?></h3>
+                    <h3><?php esc_html_e('開発支援', 'wp-smart-csv-import-export'); ?></h3>
                     <div style="background: #f0f8ff; border: 1px solid #0073aa; padding: 20px; border-radius: 8px; margin: 15px 0;">
-                        <h4 style="margin-top: 0; color: #0073aa;"><?php _e('このプラグインが役に立ちましたか？', $this'wp-smart-csv-import-export'); ?></h4>
-                        <p><?php _e('WP Smart CSV Import/Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしこのプラグインがあなたの作業に役立ったなら、開発支援をご検討ください。', $this'wp-smart-csv-import-export'); ?></p>
+                        <h4 style="margin-top: 0; color: #0073aa;"><?php esc_html_e('このプラグインが役に立ちましたか？', 'wp-smart-csv-import-export'); ?></h4>
+                        <p><?php esc_html_e('Smart CSV Import & Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしよかったら労いの気持ちをこめて、私にスターバックスラテを奢ってくれませんか？', 'wp-smart-csv-import-export'); ?></p>
                         
                         <div style="text-align: center; margin: 20px 0;">
                             <style>.pp-JKL3WTQLH5NXA{text-align:center;border:none;border-radius:0.25rem;min-width:11.625rem;padding:0 2rem;height:2.625rem;font-weight:bold;background-color:#394887;color:#ffffff;font-family:"Helvetica Neue",Arial,sans-serif;font-size:1rem;line-height:1.25rem;cursor:pointer;}</style>
                             <form action="https://www.paypal.com/ncp/payment/JKL3WTQLH5NXA" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
-                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php _e('寄付する', $this'wp-smart-csv-import-export'); ?>" />
-                                <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="cards" style="max-width: 200px;" />
+                                <input class="pp-JKL3WTQLH5NXA" type="submit" value="💝 <?php esc_html_e('寄付する', 'wp-smart-csv-import-export'); ?>" />
+                                <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-cards.svg'); ?>" alt="cards" style="max-width: 200px;" />
                                 <section style="font-size: 0.75rem;"> 
-                                    Powered by <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/>
+                                    Powered by <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'assets/images/paypal-logo.svg'); ?>" alt="paypal" style="height:0.875rem;vertical-align:middle;"/>
                                 </section>
                             </form>
                         </div>
                         
                         <p style="font-size: 14px; color: #666; text-align: center; margin-bottom: 0;">
-                            <?php _e('寄付は任意です。金額もお気持ちで結構です。', $this'wp-smart-csv-import-export'); ?><br>
+                            <?php esc_html_e('寄付は任意です。金額もお気持ちで結構です。', 'wp-smart-csv-import-export'); ?><br>
                         </p>
                     </div>
                 </div>
@@ -467,11 +475,11 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_get_fields() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
-        $post_type = sanitize_text_field($_POST['post_type']);
+        $post_type = isset($_POST['post_type']) ? sanitize_text_field(wp_unslash($_POST['post_type'])) : '';
         
         try {
             $fields = $this->get_available_fields($post_type);
@@ -489,32 +497,32 @@ ID,post_type,post_title,post_content,post_status
         
         // 基本フィールド
         $basic_fields = array(
-            'ID' => __('投稿ID', $this'wp-smart-csv-import-export'),
-            'post_type' => __('投稿タイプ', $this'wp-smart-csv-import-export'),
-            'post_title' => __('タイトル', $this'wp-smart-csv-import-export'),
-            'post_content' => __('内容', $this'wp-smart-csv-import-export'),
-            'post_excerpt' => __('抜粋', $this'wp-smart-csv-import-export'),
-            'post_status' => __('ステータス', $this'wp-smart-csv-import-export'),
-            'post_date' => __('公開日時', $this'wp-smart-csv-import-export'),
-            'post_modified' => __('変更日時', $this'wp-smart-csv-import-export'),
-            'post_author' => __('投稿者', $this'wp-smart-csv-import-export'),
-            'post_name' => __('スラッグ', $this'wp-smart-csv-import-export'),
-            'post_parent' => __('親投稿', $this'wp-smart-csv-import-export'),
-            'menu_order' => __('メニュー順序', $this'wp-smart-csv-import-export'),
+            'ID' => esc_html__('投稿ID', 'wp-smart-csv-import-export'),
+            'post_type' => esc_html__('投稿タイプ', 'wp-smart-csv-import-export'),
+            'post_title' => esc_html__('タイトル', 'wp-smart-csv-import-export'),
+            'post_content' => esc_html__('内容', 'wp-smart-csv-import-export'),
+            'post_excerpt' => esc_html__('抜粋', 'wp-smart-csv-import-export'),
+            'post_status' => esc_html__('ステータス', 'wp-smart-csv-import-export'),
+            'post_date' => esc_html__('公開日時', 'wp-smart-csv-import-export'),
+            'post_modified' => esc_html__('変更日時', 'wp-smart-csv-import-export'),
+            'post_author' => esc_html__('投稿者', 'wp-smart-csv-import-export'),
+            'post_name' => esc_html__('スラッグ', 'wp-smart-csv-import-export'),
+            'post_parent' => esc_html__('親投稿', 'wp-smart-csv-import-export'),
+            'menu_order' => esc_html__('メニュー順序', 'wp-smart-csv-import-export'),
         );
         
         $fields['basic'] = array(
-            'title' => __('基本フィールド', $this'wp-smart-csv-import-export'),
+            'title' => esc_html__('基本フィールド', 'wp-smart-csv-import-export'),
             'fields' => $basic_fields
         );
         
         // アイキャッチ画像
         if (post_type_supports($post_type, 'thumbnail')) {
             $fields['thumbnail'] = array(
-                'title' => __('アイキャッチ画像', $this'wp-smart-csv-import-export'),
+                'title' => esc_html__('アイキャッチ画像', 'wp-smart-csv-import-export'),
                 'fields' => array(
-                    'featured_image' => __('アイキャッチ画像URL', $this'wp-smart-csv-import-export'),
-                    'featured_image_id' => __('アイキャッチ画像ID', $this'wp-smart-csv-import-export'),
+                    'featured_image' => esc_html__('アイキャッチ画像URL', 'wp-smart-csv-import-export'),
+                    'featured_image_id' => esc_html__('アイキャッチ画像ID', 'wp-smart-csv-import-export'),
                 )
             );
         }
@@ -528,7 +536,7 @@ ID,post_type,post_title,post_content,post_status
             }
             
             $fields['taxonomies'] = array(
-                'title' => __('タクソノミー', $this'wp-smart-csv-import-export'),
+                'title' => esc_html__('タクソノミー', 'wp-smart-csv-import-export'),
                 'fields' => $taxonomy_fields
             );
         }
@@ -537,7 +545,7 @@ ID,post_type,post_title,post_content,post_status
         $custom_fields = $this->get_custom_fields($post_type);
         if (!empty($custom_fields)) {
             $fields['custom_fields'] = array(
-                'title' => __('カスタムフィールド', $this'wp-smart-csv-import-export'),
+                'title' => esc_html__('カスタムフィールド', 'wp-smart-csv-import-export'),
                 'fields' => $custom_fields
             );
         }
@@ -609,16 +617,27 @@ ID,post_type,post_title,post_content,post_status
             FROM {$wpdb->postmeta} pm
             INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
             WHERE p.post_type = %s
-            AND pm.meta_key NOT LIKE '\_%'
+            AND pm.meta_key NOT LIKE %s
             AND pm.meta_key NOT REGEXP '^field_[a-f0-9]+$'
             ORDER BY pm.meta_key
-        ", $post_type);
+        ", $post_type, '\_%');
         
-        $results = $wpdb->get_results($query);
+        // キャッシュキーを生成
+        $cache_key = 'wp_smart_csv_meta_fields_' . md5($post_type);
+        $cached_fields = wp_cache_get($cache_key, 'wp_smart_csv');
+        
+        if ($cached_fields !== false) {
+            return $cached_fields;
+        }
+        
+        $results = $wpdb->get_results($query); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         
         foreach ($results as $result) {
             $existing_fields[$result->meta_key] = $result->meta_key;
         }
+        
+        // 結果をキャッシュ（1時間）
+        wp_cache_set($cache_key, $existing_fields, 'wp_smart_csv', HOUR_IN_SECONDS);
         
         return $existing_fields;
     }
@@ -689,35 +708,35 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_csv_export() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
         // 権限確認
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('権限がありません。', $this'wp-smart-csv-import-export')));
+            wp_send_json_error(array('message' => esc_html__('権限がありません。', 'wp-smart-csv-import-export')));
         }
         
         try {
-            $post_type = sanitize_text_field($_POST['post_type']);
-            $post_status = isset($_POST['post_status']) ? array_map('sanitize_text_field', $_POST['post_status']) : array('publish');
-            $limit = intval($_POST['limit']);
-            $offset = intval($_POST['offset']);
-            $date_from = sanitize_text_field($_POST['date_from']);
-            $date_to = sanitize_text_field($_POST['date_to']);
-            $selected_fields = isset($_POST['selected_fields']) ? array_map('sanitize_text_field', $_POST['selected_fields']) : array();
+            $post_type = isset($_POST['post_type']) ? sanitize_text_field(wp_unslash($_POST['post_type'])) : '';
+            $post_status = isset($_POST['post_status']) ? array_map('sanitize_text_field', wp_unslash($_POST['post_status'])) : array('publish');
+            $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 0;
+            $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
+            $date_from = isset($_POST['date_from']) ? sanitize_text_field(wp_unslash($_POST['date_from'])) : '';
+            $date_to = isset($_POST['date_to']) ? sanitize_text_field(wp_unslash($_POST['date_to'])) : '';
+            $selected_fields = isset($_POST['selected_fields']) ? array_map('sanitize_text_field', wp_unslash($_POST['selected_fields'])) : array();
             
             $csv_data = $this->export_posts_to_csv($post_type, $post_status, $limit, $offset, $date_from, $date_to, $selected_fields);
             
             wp_send_json_success(array(
-                'message' => __('エクスポートが完了しました。', $this'wp-smart-csv-import-export'),
+                'message' => esc_html__('エクスポートが完了しました。', 'wp-smart-csv-import-export'),
                 'download_url' => $csv_data['url'],
                 'filename' => $csv_data['filename']
             ));
             
         } catch (Exception $e) {
             wp_send_json_error(array(
-                'message' => __('エクスポート中にエラーが発生しました: ', $this'wp-smart-csv-import-export') . $e->getMessage()
+                'message' => esc_html__('エクスポート中にエラーが発生しました: ', 'wp-smart-csv-import-export') . $e->getMessage()
             ));
         }
     }
@@ -727,29 +746,36 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_csv_import_count() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
         // 第一クリーンアップ：既存の一時ファイルを全削除
         $this->cleanup_all_temp_files();
         
         // ファイルアップロード処理
-        if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-            wp_send_json_error(array('message' => __('ファイルのアップロードに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_FILES['csv_file']) || !isset($_FILES['csv_file']['error']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+            wp_send_json_error(array('message' => __('ファイルのアップロードに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
-        $csv_file = $_FILES['csv_file']['tmp_name'];
+        if (!isset($_FILES['csv_file']['tmp_name']) || empty($_FILES['csv_file']['tmp_name'])) {
+            wp_send_json_error(array('message' => __('アップロードファイルが見つかりません。', 'wp-smart-csv-import-export')));
+        }
+        
+        $csv_file = sanitize_text_field($_FILES['csv_file']['tmp_name']);
         
         try {
             // CSVファイル読み込み
-            $file = fopen($csv_file, 'r');
+            if (!file_exists($csv_file) || !is_readable($csv_file)) {
+                throw new Exception(esc_html__('CSVファイルが見つからないか読み取れません。', 'wp-smart-csv-import-export'));
+            }
+            $file = fopen($csv_file, 'r'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
             if (!$file) {
-                throw new Exception(__('CSVファイルを開けませんでした。', $this'wp-smart-csv-import-export'));
+                throw new Exception(esc_html__('CSVファイルを開けませんでした。', 'wp-smart-csv-import-export'));
             }
             
             // BOM除去
-            $bom = fread($file, 3);
+            $bom = fread($file, 3); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
             if ($bom !== "\xEF\xBB\xBF") {
                 rewind($file);
             }
@@ -765,7 +791,7 @@ ID,post_type,post_title,post_content,post_status
                 }
             }
             
-            fclose($file);
+            fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
             
             // 一時ファイルとして保存（バッチ処理用）
             $upload_dir = wp_upload_dir();
@@ -778,14 +804,16 @@ ID,post_type,post_title,post_content,post_status
             $temp_filename = 'import_' . uniqid() . '.csv';
             $temp_filepath = $temp_dir . '/' . $temp_filename;
             
-            if (!move_uploaded_file($_FILES['csv_file']['tmp_name'], $temp_filepath)) {
-                throw new Exception(__('一時ファイルの保存に失敗しました。', $this'wp-smart-csv-import-export'));
+            $uploaded_file = isset($_FILES['csv_file']['tmp_name']) ? sanitize_text_field($_FILES['csv_file']['tmp_name']) : '';
+            if (empty($uploaded_file) || !move_uploaded_file($uploaded_file, $temp_filepath)) { // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found
+                throw new Exception(esc_html__('一時ファイルの保存に失敗しました。', 'wp-smart-csv-import-export'));
             }
             
             wp_send_json_success(array(
                 'total_rows' => $total_rows,
                 'temp_file' => $temp_filename,
-                'message' => sprintf(__('%d件のデータが見つかりました。', $this'wp-smart-csv-import-export'), $total_rows)
+                /* translators: %d: number of data rows found */
+                'message' => sprintf(esc_html__('%d件のデータが見つかりました。', 'wp-smart-csv-import-export'), $total_rows)
             ));
             
         } catch (Exception $e) {
@@ -798,31 +826,30 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_csv_import_batch() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
-        $import_mode = sanitize_text_field($_POST['import_mode']);
-        $temp_filename = sanitize_text_field($_POST['temp_file']);
-        $batch_start = intval($_POST['batch_start']);
-        $batch_size = intval($_POST['batch_size']) ?: 10; // デフォルト10件ずつ
+        $import_mode = isset($_POST['import_mode']) ? sanitize_text_field(wp_unslash($_POST['import_mode'])) : 'update';
+        $temp_filename = isset($_POST['temp_file']) ? sanitize_text_field(wp_unslash($_POST['temp_file'])) : '';
+        $batch_start = isset($_POST['batch_start']) ? intval($_POST['batch_start']) : 0;
+        $batch_size = isset($_POST['batch_size']) ? intval($_POST['batch_size']) : 10; // デフォルト10件ずつ
         
         try {
             $upload_dir = wp_upload_dir();
             $temp_filepath = $upload_dir['basedir'] . '/wp-smart-csv-temp/' . $temp_filename;
             
-            if (!file_exists($temp_filepath)) {
-                throw new Exception(__('一時ファイルが見つかりません。', $this'wp-smart-csv-import-export'));
-            }
-            
             // CSVファイル読み込み
-            $file = fopen($temp_filepath, 'r');
+            if (!file_exists($temp_filepath) || !is_readable($temp_filepath)) {
+                throw new Exception(esc_html__('一時ファイルが見つかりません。', 'wp-smart-csv-import-export'));
+            }
+            $file = fopen($temp_filepath, 'r'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
             if (!$file) {
-                throw new Exception(__('CSVファイルを開けませんでした。', $this'wp-smart-csv-import-export'));
+                throw new Exception(esc_html__('CSVファイルを開けませんでした。', 'wp-smart-csv-import-export'));
             }
             
             // BOM除去
-            $bom = fread($file, 3);
+            $bom = fread($file, 3); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
             if ($bom !== "\xEF\xBB\xBF") {
                 rewind($file);
             }
@@ -830,8 +857,8 @@ ID,post_type,post_title,post_content,post_status
             // ヘッダー行取得
             $headers = fgetcsv($file);
             if (!$headers) {
-                fclose($file);
-                throw new Exception(__('CSVファイルのヘッダーが読み取れませんでした。', $this'wp-smart-csv-import-export'));
+                fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+                throw new Exception(esc_html__('CSVファイルのヘッダーが読み取れませんでした。', 'wp-smart-csv-import-export'));
             }
             
             // 指定された開始位置まで移動
@@ -874,7 +901,7 @@ ID,post_type,post_title,post_content,post_status
                 $processed++;
             }
             
-            fclose($file);
+            fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
             
             wp_send_json_success(array(
                 'processed' => $processed,
@@ -893,15 +920,15 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_csv_cleanup() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
         try {
             // 第二クリーンアップ：ディレクトリごと完全削除
             $this->cleanup_complete_temp_directory();
             
-            wp_send_json_success(array('message' => __('一時ディレクトリを完全にクリーンアップしました。', $this'wp-smart-csv-import-export')));
+            wp_send_json_success(array('message' => __('一時ディレクトリを完全にクリーンアップしました。', 'wp-smart-csv-import-export')));
             
         } catch (Exception $e) {
             wp_send_json_error(array('message' => $e->getMessage()));
@@ -925,7 +952,7 @@ ID,post_type,post_title,post_content,post_status
         
         foreach ($files as $file) {
             if (file_exists($file)) {
-                if (unlink($file)) {
+                if (wp_delete_file($file)) {
                     $deleted_count++;
                 }
             }
@@ -933,12 +960,12 @@ ID,post_type,post_title,post_content,post_status
         
         // ディレクトリも削除
         if (is_dir($temp_dir) && count(scandir($temp_dir)) == 2) { // . と .. のみ
-            rmdir($temp_dir);
+            rmdir($temp_dir); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
         }
         
         // ログ出力（デバッグ用）
         if ($deleted_count > 0) {
-            error_log("WP Smart CSV: 第一クリーンアップで{$deleted_count}個の一時ファイルを削除しました");
+            // Debug: 第一クリーンアップで{$deleted_count}個の一時ファイルを削除
         }
     }
     
@@ -959,7 +986,7 @@ ID,post_type,post_title,post_content,post_status
         
         foreach ($files as $file) {
             if (is_file($file)) {
-                if (unlink($file)) {
+                if (wp_delete_file($file)) {
                     $deleted_count++;
                 }
             }
@@ -967,12 +994,12 @@ ID,post_type,post_title,post_content,post_status
         
         // ディレクトリを削除
         if (is_dir($temp_dir)) {
-            rmdir($temp_dir);
+            rmdir($temp_dir); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
         }
         
         // ログ出力（デバッグ用）
         if ($deleted_count > 0) {
-            error_log("WP Smart CSV: 第二クリーンアップで{$deleted_count}個のファイルを削除し、ディレクトリを削除しました");
+            // Debug: 第二クリーンアップで{$deleted_count}個のファイルを削除し、ディレクトリを削除
         }
     }
     
@@ -981,29 +1008,35 @@ ID,post_type,post_title,post_content,post_status
      */
     public function handle_csv_import() {
         // nonce確認
-        if (!wp_verify_nonce($_POST['nonce'], 'wp_smart_csv_nonce')) {
-            wp_send_json_error(array('message' => __('セキュリティチェックに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_smart_csv_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('セキュリティチェックに失敗しました。', 'wp-smart-csv-import-export')));
         }
         
         // 権限確認
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('権限がありません。', $this'wp-smart-csv-import-export')));
+            wp_send_json_error(array('message' => esc_html__('権限がありません。', 'wp-smart-csv-import-export')));
         }
         
-        if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-            wp_send_json_error(array('message' => __('ファイルのアップロードに失敗しました。', $this'wp-smart-csv-import-export')));
+        if (!isset($_FILES['csv_file']) || !isset($_FILES['csv_file']['error']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+            wp_send_json_error(array('message' => __('ファイルのアップロードに失敗しました。', 'wp-smart-csv-import-export')));
+        }
+        
+        if (!isset($_FILES['csv_file']['tmp_name']) || empty($_FILES['csv_file']['tmp_name'])) {
+            wp_send_json_error(array('message' => __('アップロードファイルが見つかりません。', 'wp-smart-csv-import-export')));
         }
         
         try {
-            $post_type = sanitize_text_field($_POST['post_type']);
-            $import_mode = sanitize_text_field($_POST['import_mode']);
-            $duplicate_action = sanitize_text_field($_POST['duplicate_action']);
+            $post_type = isset($_POST['post_type']) ? sanitize_text_field(wp_unslash($_POST['post_type'])) : 'post';
+            $import_mode = isset($_POST['import_mode']) ? sanitize_text_field(wp_unslash($_POST['import_mode'])) : 'update';
+            $duplicate_action = isset($_POST['duplicate_action']) ? sanitize_text_field(wp_unslash($_POST['duplicate_action'])) : 'skip';
             
-            $result = $this->import_posts_from_csv($_FILES['csv_file']['tmp_name'], $post_type, $import_mode, $duplicate_action);
+            $uploaded_file = sanitize_text_field($_FILES['csv_file']['tmp_name']);
+            $result = $this->import_posts_from_csv($uploaded_file, $post_type, $import_mode, $duplicate_action);
             
             wp_send_json_success(array(
                 'message' => sprintf(
-                    __('インポートが完了しました。作成: %d件、更新: %d件、スキップ: %d件、エラー: %d件', $this'wp-smart-csv-import-export'),
+                    /* translators: %1$d: created posts, %2$d: updated posts, %3$d: skipped posts, %4$d: error posts */
+                    __('インポートが完了しました。作成: %1$d件、更新: %2$d件、スキップ: %3$d件、エラー: %4$d件', 'wp-smart-csv-import-export'),
                     $result['created'],
                     $result['updated'],
                     $result['skipped'],
@@ -1013,7 +1046,7 @@ ID,post_type,post_title,post_content,post_status
             
         } catch (Exception $e) {
             wp_send_json_error(array(
-                'message' => __('インポート中にエラーが発生しました: ', $this'wp-smart-csv-import-export') . $e->getMessage()
+                'message' => __('インポート中にエラーが発生しました: ', 'wp-smart-csv-import-export') . $e->getMessage()
             ));
         }
     }
@@ -1056,7 +1089,7 @@ ID,post_type,post_title,post_content,post_status
         $posts = get_posts($args);
         
         if (empty($posts)) {
-            throw new Exception(__('エクスポートするデータがありません。', $this'wp-smart-csv-import-export'));
+            throw new Exception(esc_html__('エクスポートするデータがありません。', 'wp-smart-csv-import-export'));
         }
         
         // 利用可能なフィールドを取得（すべての投稿タイプの場合は基本フィールドのみ）
@@ -1210,19 +1243,19 @@ ID,post_type,post_title,post_content,post_status
         // 既存ファイルをチェックして5件制限を適用
         $this->cleanup_csv_files($csv_dir);
         
-        $filename = sprintf('%s_export_%s.csv', $post_type, date('Y-m-d_H-i-s'));
+        $filename = sprintf('%s_export_%s.csv', $post_type, gmdate('Y-m-d_H-i-s'));
         $filepath = $csv_dir . '/' . $filename;
         
-        $file = fopen($filepath, 'w');
+        $file = fopen($filepath, 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
         
         // BOM付きUTF-8で出力
-        fwrite($file, "\xEF\xBB\xBF");
+        fwrite($file, "\xEF\xBB\xBF"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
         
         foreach ($csv_data as $row) {
             fputcsv($file, $row);
         }
         
-        fclose($file);
+        fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
         
         return array(
             'url' => $csv_url . '/' . $filename,
@@ -1249,7 +1282,7 @@ ID,post_type,post_title,post_content,post_status
             
             foreach ($files_to_delete as $file) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    wp_delete_file($file);
                 }
             }
         }
@@ -1267,13 +1300,16 @@ ID,post_type,post_title,post_content,post_status
         );
         
         // CSVファイル読み込み
-        $file = fopen($csv_file, 'r');
+        if (!file_exists($csv_file) || !is_readable($csv_file)) {
+            throw new Exception(esc_html__('CSVファイルが見つからないか読み取れません。', 'wp-smart-csv-import-export'));
+        }
+        $file = fopen($csv_file, 'r'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
         if (!$file) {
-            throw new Exception(__('CSVファイルを開けませんでした。', $this'wp-smart-csv-import-export'));
+            throw new Exception(esc_html__('CSVファイルを開けませんでした。', 'wp-smart-csv-import-export'));
         }
         
         // BOM除去
-        $bom = fread($file, 3);
+        $bom = fread($file, 3); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
         if ($bom !== "\xEF\xBB\xBF") {
             rewind($file);
         }
@@ -1281,8 +1317,8 @@ ID,post_type,post_title,post_content,post_status
         // ヘッダー行取得
         $headers = fgetcsv($file);
         if (!$headers) {
-            fclose($file);
-            throw new Exception(__('CSVファイルのヘッダーが読み取れませんでした。', $this'wp-smart-csv-import-export'));
+            fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+            throw new Exception(esc_html__('CSVファイルのヘッダーが読み取れませんでした。', 'wp-smart-csv-import-export'));
         }
         
         // データ行処理
@@ -1313,11 +1349,11 @@ ID,post_type,post_title,post_content,post_status
                 
             } catch (Exception $e) {
                 $result['errors']++;
-                error_log("CSV Import Error (Line {$line_number}): " . $e->getMessage());
+                // CSV Import Error (Line {$line_number}): " . $e->getMessage()
             }
         }
         
-        fclose($file);
+        fclose($file); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
         
         return $result;
     }
@@ -1622,13 +1658,13 @@ ID,post_type,post_title,post_content,post_status
             $csv_files = glob($csv_dir . '/*_export_*.csv');
             foreach ($csv_files as $file) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    wp_delete_file($file);
                 }
             }
             
             // ディレクトリを削除（空の場合）
             if (is_dir($csv_dir) && count(scandir($csv_dir)) == 2) { // . と .. のみ
-                rmdir($csv_dir);
+                rmdir($csv_dir); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
             }
         }
         
@@ -1640,18 +1676,29 @@ ID,post_type,post_title,post_content,post_status
             $temp_files = glob($temp_dir . '/import_*.csv');
             foreach ($temp_files as $file) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    wp_delete_file($file);
                 }
             }
             
             // ディレクトリを削除（空の場合）
             if (is_dir($temp_dir) && count(scandir($temp_dir)) == 2) { // . と .. のみ
-                rmdir($temp_dir);
+                rmdir($temp_dir); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
             }
         }
         
         // プラグインで作成したカスタムタクソノミーの記録を削除
         delete_option('wp_smart_csv_custom_taxonomies');
+    }
+    
+    /**
+     * メタフィールドキャッシュを無効化
+     */
+    public function clear_meta_fields_cache($meta_id, $post_id, $meta_key, $meta_value) {
+        $post = get_post($post_id);
+        if ($post) {
+            $cache_key = 'wp_smart_csv_meta_fields_' . md5($post->post_type);
+            wp_cache_delete($cache_key, 'wp_smart_csv');
+        }
     }
 }
 

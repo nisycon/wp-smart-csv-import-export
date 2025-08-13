@@ -1,9 +1,9 @@
-=== WP Smart CSV Import/Export ===
+=== Smart CSV Import & Export ===
 Contributors: qoox
 Donate link: https://www.paypal.com/ncp/payment/JKL3WTQLH5NXA
-Tags: csv, import, export, custom-post-types, custom-fields, acf, taxonomy, bulk-edit, data-migration
+Tags: csv, import, export, custom-post-types, custom-fields
 Requires at least: 5.0
-Tested up to: 6.4
+Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPL v2 or later

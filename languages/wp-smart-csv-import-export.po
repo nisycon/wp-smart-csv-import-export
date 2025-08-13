@@ -16,8 +16,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 # Plugin Header
-msgid "WP Smart CSV Import/Export"
-msgstr "WP Smart CSV Import/Export"
+msgid "Smart CSV Import & Export"
+msgstr "Smart CSV Import & Export"
 
 msgid "CSV IMP/EXP"
 msgstr "CSV IMP/EXP"
@@ -360,8 +360,8 @@ msgstr "Development Support"
 msgid "このプラグインが役に立ちましたか？"
 msgstr "Was this plugin helpful?"
 
-msgid "WP Smart CSV Import/Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしこのプラグインがあなたの作業に役立ったなら、開発支援をご検討ください。"
-msgstr "WP Smart CSV Import/Export is provided free of charge, but development and maintenance require time and effort. If this plugin has helped your work, please consider supporting development."
+msgid "Smart CSV Import & Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしよかったら労いの気持ちをこめて、私にスターバックスラテを奢ってくれませんか？"
+msgstr "Smart CSV Import & Export is provided free of charge, but development and maintenance require time and effort. If you don't mind, could you treat me to a Starbucks latte as a token of appreciation?"
 
 msgid "PayPalで寄付する"
 msgstr "Donate via PayPal"
@@ -371,9 +371,6 @@ msgstr "Donate"
 
 msgid "寄付は任意です。金額もお気持ちで結構です。"
 msgstr "Donation is optional. Any amount is appreciated."
-
-msgid "開発支援をご検討ください。"
-msgstr "Please consider supporting development."
 
 # Field Labels
 msgid "投稿ID"
@@ -430,3 +427,12 @@ msgstr "No data to export."
 
 msgid "一時ファイルが見つかりません。"
 msgstr "Temporary file not found."
+
+msgid "クレジットカード・デビットカード対応"
+msgstr "Credit/Debit Cards Accepted"
+
+msgid "Powered by PayPal"
+msgstr "Powered by PayPal"
+
+msgid "アップロードファイルが見つかりません。"
+msgstr "Upload file not found."
