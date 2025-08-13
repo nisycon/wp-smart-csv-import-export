@@ -1,0 +1,432 @@
+# WP Smart CSV Import/Export
+# Copyright (C) 2024 Qoox
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Smart CSV Import/Export 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: Qoox\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Plugin Header
+msgid "WP Smart CSV Import/Export"
+msgstr "WP Smart CSV Import/Export"
+
+msgid "CSV IMP/EXP"
+msgstr "CSV IMP/EXP"
+
+# Main Interface
+msgid "CSVエクスポート"
+msgstr "CSV Export"
+
+msgid "CSVインポート"
+msgstr "CSV Import"
+
+msgid "使用方法"
+msgstr "Help"
+
+msgid "投稿データをCSVファイルとしてエクスポートします。"
+msgstr "Export post data as CSV file."
+
+msgid "CSVファイルから投稿データをインポートします。"
+msgstr "Import post data from CSV file."
+
+msgid "投稿タイプ"
+msgstr "Post Type"
+
+msgid "選択してください"
+msgstr "Please select"
+
+msgid "すべての投稿タイプ"
+msgstr "All Post Types"
+
+msgid "投稿ステータス"
+msgstr "Post Status"
+
+msgid "公開済み"
+msgstr "Published"
+
+msgid "下書き"
+msgstr "Draft"
+
+msgid "非公開"
+msgstr "Private"
+
+msgid "レビュー待ち"
+msgstr "Pending Review"
+
+msgid "予約投稿"
+msgstr "Scheduled"
+
+msgid "ゴミ箱"
+msgstr "Trash"
+
+msgid "エクスポート件数"
+msgstr "Export Limit"
+
+msgid "0を指定すると全件エクスポートします。"
+msgstr "Specify 0 to export all posts."
+
+msgid "日付範囲"
+msgstr "Date Range"
+
+msgid "開始日"
+msgstr "Start Date"
+
+msgid "終了日"
+msgstr "End Date"
+
+msgid "フィールド選択"
+msgstr "Field Selection"
+
+msgid "投稿タイプを選択すると、利用可能なフィールドが表示されます。"
+msgstr "Available fields will be displayed when you select a post type."
+
+msgid "CSVエクスポート"
+msgstr "Export CSV"
+
+msgid "CSVファイル"
+msgstr "CSV File"
+
+msgid "インポートモード"
+msgstr "Import Mode"
+
+msgid "更新＋新規作成"
+msgstr "Update + Create"
+
+msgid "IDがある場合は更新、ない場合は新規作成します（推奨）"
+msgstr "Update if ID exists, create new if not (Recommended)"
+
+msgid "新規作成のみ"
+msgstr "Create Only"
+
+msgid "IDを無視して常に新規投稿を作成します（非推奨）"
+msgstr "Always create new posts, ignoring IDs (Not recommended)"
+
+msgid "CSVインポート"
+msgstr "Import CSV"
+
+# Progress and Status Messages
+msgid "エクスポートが完了しました。"
+msgstr "Export completed successfully."
+
+msgid "インポートが完了しました。"
+msgstr "Import completed successfully."
+
+msgid "エラーが発生しました。"
+msgstr "An error occurred."
+
+msgid "処理中..."
+msgstr "Processing..."
+
+msgid "投稿タイプを選択してください。"
+msgstr "Please select a post type."
+
+msgid "CSVファイルを選択してください。"
+msgstr "Please select a CSV file."
+
+# Warning Messages
+msgid "重要な注意事項"
+msgstr "Important Notes"
+
+msgid "処理中はブラウザタブを閉じないでください"
+msgstr "Do not close the browser tab during processing"
+
+msgid "別のページに移動しないでください"
+msgstr "Do not navigate to another page"
+
+msgid "PCをスリープさせないでください"
+msgstr "Do not put your computer to sleep"
+
+msgid "大きなファイルの場合は、処理完了まで画面を開いたままにしてください"
+msgstr "For large files, keep the screen open until processing is complete"
+
+# Help Section
+msgid "基本的な使い方"
+msgstr "Basic Usage"
+
+msgid "エクスポートタブで投稿タイプを選択し、必要なフィールドにチェックを入れてエクスポート"
+msgstr "Select post type in Export tab, check required fields and export"
+
+msgid "ダウンロードされたCSVファイルを編集"
+msgstr "Edit the downloaded CSV file"
+
+msgid "インポートタブで編集したCSVファイルをアップロードしてインポート"
+msgstr "Upload the edited CSV file in Import tab and import"
+
+msgid "対応フィールド"
+msgstr "Supported Fields"
+
+msgid "基本フィールド"
+msgstr "Basic Fields"
+
+msgid "カスタムフィールド"
+msgstr "Custom Fields"
+
+msgid "タクソノミー"
+msgstr "Taxonomies"
+
+msgid "アイキャッチ画像"
+msgstr "Featured Images"
+
+msgid "技術仕様"
+msgstr "Technical Specifications"
+
+msgid "post_type列について"
+msgstr "About post_type Column"
+
+msgid "エクスポート時"
+msgstr "On Export"
+
+msgid "各投稿の投稿タイプ名が出力されます（例：post, page, items, product）"
+msgstr "Post type names are output for each post (e.g.: post, page, items, product)"
+
+msgid "インポート時"
+msgstr "On Import"
+
+msgid "post_type列の値に基づいて投稿タイプが自動判別されます"
+msgstr "Post type is automatically determined based on post_type column value"
+
+msgid "投稿タイプ選択不要"
+msgstr "No Post Type Selection Required"
+
+msgid "インポート時は投稿タイプを選択する必要がありません"
+msgstr "No need to select post type when importing"
+
+msgid "混在データ対応"
+msgstr "Mixed Data Support"
+
+msgid "異なる投稿タイプが混在するCSVでも一括インポート可能"
+msgstr "Bulk import possible even with CSV containing different post types"
+
+msgid "ID判別システム"
+msgstr "ID Detection System"
+
+msgid "一意性"
+msgstr "Uniqueness"
+
+msgid "WordPressでは全投稿タイプでIDが一意に管理されます"
+msgstr "WordPress manages IDs uniquely across all post types"
+
+msgid "更新判定"
+msgstr "Update Detection"
+
+msgid "IDが存在する場合は投稿タイプに関係なく既存投稿として更新されます"
+msgstr "If ID exists, it will be updated as existing post regardless of post type"
+
+msgid "新規作成"
+msgstr "New Creation"
+
+msgid "IDが空または存在しない場合は新規投稿として作成されます"
+msgstr "If ID is empty or doesn't exist, it will be created as new post"
+
+msgid "投稿タイプ変更"
+msgstr "Post Type Change"
+
+msgid "既存投稿の投稿タイプをCSVで変更することが可能です"
+msgstr "Possible to change post type of existing posts via CSV"
+
+# CSV Format
+msgid "CSVフォーマット"
+msgstr "CSV Format"
+
+msgid "エクスポート時（自動生成）"
+msgstr "On Export (Auto-generated)"
+
+msgid "文字エンコード"
+msgstr "Character Encoding"
+
+msgid "区切り文字"
+msgstr "Delimiter"
+
+msgid "囲み文字"
+msgstr "Enclosure"
+
+msgid "改行文字"
+msgstr "Line Ending"
+
+msgid "データ保護"
+msgstr "Data Protection"
+
+msgid "カンマや改行を含むデータは自動的にクォートで囲まれます"
+msgstr "Data containing commas or line breaks is automatically quoted"
+
+msgid "インポート時（要注意）"
+msgstr "On Import (Important)"
+
+msgid "データ内カンマ"
+msgstr "Commas in Data"
+
+msgid "データにカンマが含まれる場合は必ずダブルクォートで囲んでください"
+msgstr "If data contains commas, it must be enclosed in double quotes"
+
+msgid "改行の扱い"
+msgstr "Line Break Handling"
+
+msgid "データ内改行はクォート内であれば保持されます"
+msgstr "Line breaks in data are preserved if within quotes"
+
+msgid "Excel注意"
+msgstr "Excel Note"
+
+msgid "Excelで編集時は保存形式を「CSV UTF-8」にしてください"
+msgstr "When editing in Excel, save as 'CSV UTF-8' format"
+
+msgid "データ内特殊文字の扱い"
+msgstr "Handling Special Characters in Data"
+
+msgid "⚠️ 重要"
+msgstr "⚠️ Important"
+
+msgid "以下の文字を含むデータは必ずダブルクォートで囲んでください"
+msgstr "Data containing the following characters must be enclosed in double quotes"
+
+msgid "カンマ"
+msgstr "Comma"
+
+msgid "商品A, 商品B, 商品C"
+msgstr "Product A, Product B, Product C"
+
+msgid "改行"
+msgstr "Line Break"
+
+msgid "1行目"
+msgstr "Line 1"
+
+msgid "2行目"
+msgstr "Line 2"
+
+msgid "ダブルクォート"
+msgstr "Double Quote"
+
+msgid "画面サイズは15\"インチです"
+msgstr "Screen size is 15\" inches"
+
+msgid "推奨"
+msgstr "Recommended"
+
+msgid "当プラグインでエクスポートしたCSVを編集することで、フォーマットエラーを防げます"
+msgstr "Edit CSV exported by this plugin to prevent format errors"
+
+# Examples
+msgid "実用例"
+msgstr "Practical Examples"
+
+msgid "CSVデータ例"
+msgstr "CSV Data Example"
+
+msgid "動作パターン"
+msgstr "Operation Patterns"
+
+msgid "既存の投稿（ID:1）を更新"
+msgstr "Update existing post (ID:1)"
+
+msgid "既存の固定ページ（ID:2）を更新"
+msgstr "Update existing page (ID:2)"
+
+msgid "新しいitemsタイプの投稿を作成"
+msgstr "Create new items type post"
+
+msgid "ID:123の投稿をproductタイプに変更して更新"
+msgstr "Update post ID:123 changing to product type"
+
+# Notices
+msgid "注意事項"
+msgstr "Important Notes"
+
+msgid "大量データのインポート時は、サーバーのメモリ制限やタイムアウトにご注意ください"
+msgstr "Be careful of server memory limits and timeouts when importing large amounts of data"
+
+msgid "本番環境での使用前に、必ずテスト環境で動作確認を行ってください"
+msgstr "Always test in a staging environment before using in production"
+
+msgid "インポート前にデータベースのバックアップを取得することを強く推奨します"
+msgstr "Strongly recommend taking a database backup before importing"
+
+msgid "投稿タイプ変更時は、関連するカスタムフィールドやタクソノミーとの整合性をご確認ください"
+msgstr "When changing post types, check consistency with related custom fields and taxonomies"
+
+# Donation
+msgid "開発支援"
+msgstr "Development Support"
+
+msgid "このプラグインが役に立ちましたか？"
+msgstr "Was this plugin helpful?"
+
+msgid "WP Smart CSV Import/Exportは無料で提供していますが、開発とメンテナンスには時間と労力がかかります。もしこのプラグインがあなたの作業に役立ったなら、開発支援をご検討ください。"
+msgstr "WP Smart CSV Import/Export is provided free of charge, but development and maintenance require time and effort. If this plugin has helped your work, please consider supporting development."
+
+msgid "PayPalで寄付する"
+msgstr "Donate via PayPal"
+
+msgid "寄付する"
+msgstr "Donate"
+
+msgid "寄付は任意です。金額もお気持ちで結構です。"
+msgstr "Donation is optional. Any amount is appreciated."
+
+msgid "開発支援をご検討ください。"
+msgstr "Please consider supporting development."
+
+# Field Labels
+msgid "投稿ID"
+msgstr "Post ID"
+
+msgid "投稿タイプ"
+msgstr "Post Type"
+
+msgid "タイトル"
+msgstr "Title"
+
+msgid "内容"
+msgstr "Content"
+
+msgid "抜粋"
+msgstr "Excerpt"
+
+msgid "ステータス"
+msgstr "Status"
+
+msgid "公開日時"
+msgstr "Published Date"
+
+msgid "変更日時"
+msgstr "Modified Date"
+
+msgid "投稿者"
+msgstr "Author"
+
+msgid "スラッグ"
+msgstr "Slug"
+
+msgid "親投稿"
+msgstr "Parent Post"
+
+msgid "メニュー順序"
+msgstr "Menu Order"
+
+msgid "基本フィールド"
+msgstr "Basic Fields"
+
+# Error Messages
+msgid "セキュリティチェックに失敗しました。"
+msgstr "Security check failed."
+
+msgid "ファイルのアップロードに失敗しました。"
+msgstr "File upload failed."
+
+msgid "CSVファイルを開けませんでした。"
+msgstr "Could not open CSV file."
+
+msgid "エクスポートするデータがありません。"
+msgstr "No data to export."
+
+msgid "一時ファイルが見つかりません。"
+msgstr "Temporary file not found."
