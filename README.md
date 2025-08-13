@@ -114,10 +114,6 @@ ID,post_type,post_title
 - **Data Sanitization**: All inputs sanitized
 - **File Validation**: CSV format validation
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
-
 ### Development Setup
 ```bash
 # Clone repository
@@ -168,3 +164,4 @@ This plugin is licensed under the [GPL v2 or later](https://www.gnu.org/licenses
 
 
 Made with ❤️ by [Qoox](https://qoox.co.jp)
+
