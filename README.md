@@ -114,20 +114,6 @@ ID,post_type,post_title
 - **Data Sanitization**: All inputs sanitized
 - **File Validation**: CSV format validation
 
-## 🎨 Screenshots
-
-### Export Interface
-![Export Interface](assets/screenshot-1.png)
-
-### Import Interface  
-![Import Interface](assets/screenshot-2.png)
-
-### Progress Display
-![Progress Display](assets/screenshot-3.png)
-
-### Help Section
-![Help Section](assets/screenshot-4.png)
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
@@ -179,5 +165,6 @@ This plugin is licensed under the [GPL v2 or later](https://www.gnu.org/licenses
 - **Website**: [https://qoox.co.jp](https://qoox.co.jp)
 
 ---
+
 
 Made with ❤️ by [Qoox](https://qoox.co.jp)
